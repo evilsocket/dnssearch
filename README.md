@@ -25,6 +25,11 @@ It supports a custom file extension ( `-ext`, default to `php` ) and other optio
     cd dnssearch
     go build -o dnssearch main.go
 
+## Compilation and use with Docker
+
+    docker build -t dnssearch .
+    docker run -it --rm dnssearch
+
 ## License
 
 This project is copyleft of [Simone Margaritelli](http://www.evilsocket.net/) and released under the GPL 3 license.
