@@ -1,0 +1,5 @@
+dnssearch
+*.sw*
+vendor/
+build/
+!.gitkeep
