@@ -20,7 +20,9 @@ It supports a custom file extension ( `-ext`, default to `php` ) and other optio
             Wordlist file to use for enumeration. (default "names.txt")
       -txt bool
             Lookup TXT records ( default false )
-
+      -cname bool
+            Show CNAME results without following them to their A
+       
 ## Compilation
 
     go get github.com/evilsocket/dnssearch
