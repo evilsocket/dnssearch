@@ -39,15 +39,18 @@ var (
 	consumers   = flag.Int("consumers", 8, "Number of concurrent consumers.")
 	searchtxt   = flag.Bool("txt", false, "Search for TXT records")
 	searchcname = flag.Bool("cname", false, "Show CNAME results")
+	searcha     = flag.Bool("a", true, "Show A results")
 )
 
 // DoRequest actually handles the DNS lookups
 func DoRequest(sub string) interface{} {
 	hostname := fmt.Sprintf("%s.%s", sub, *base)
 	thisresult := Result{}
-	if addrs, err := net.LookupHost(hostname); err == nil {
-		thisresult.hostname = hostname
-		thisresult.addrs = addrs
+	if *searcha {
+		if addrs, err := net.LookupHost(hostname); err == nil {
+			thisresult.hostname = hostname
+			thisresult.addrs = addrs
+		}
 	}
 	if *searchtxt {
 		if txts, err := net.LookupTXT(hostname); err == nil {
@@ -77,7 +80,9 @@ func OnResult(res interface{}) {
 	}
 
 	g.Printf("%25s", result.hostname)
-	fmt.Printf(" : %v", result.addrs)
+	if *searcha {
+		fmt.Printf(" : A %v", result.addrs)
+	}
 	if *searchtxt {
 		fmt.Printf(" : TXT %v", result.txts)
 	}

@@ -18,10 +18,12 @@ It supports a custom file extension ( `-ext`, default to `php` ) and other optio
             Base domain to start enumeration from.
       -wordlist string
             Wordlist file to use for enumeration. (default "names.txt")
+      -a bool
+            Lookup A records ( default true )
       -txt bool
             Lookup TXT records ( default false )
       -cname bool
-            Show CNAME results without following them to their A
+            Show CNAME results ( default false )
        
 ## Compilation
 
