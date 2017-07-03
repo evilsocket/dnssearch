@@ -7,4 +7,4 @@ FROM alpine:latest
 WORKDIR /app
 COPY --from=build-stage /go/src/github.com/evilsocket/dnssearch/dnssearch /app
 COPY names.txt /app
-CMD ["/app/dnssearch"]
+ENTRYPOINT ["/app/dnssearch"]
