@@ -23,6 +23,7 @@ type Result struct {
 	hostname string
 	addrs    []string
 	txts     []string
+	cname    string // Per RFC, there should only be one CNAME
 }
 
 var (
@@ -33,24 +34,34 @@ var (
 	r = color.New(color.FgRed)
 	b = color.New(color.FgBlue)
 
-	base      = flag.String("domain", "", "Base domain to start enumeration from.")
-	wordlist  = flag.String("wordlist", "names.txt", "Wordlist file to use for enumeration.")
-	consumers = flag.Int("consumers", 8, "Number of concurrent consumers.")
-	searchtxt = flag.Bool("txt", false, "Search for TXT records")
+	base        = flag.String("domain", "", "Base domain to start enumeration from.")
+	wordlist    = flag.String("wordlist", "names.txt", "Wordlist file to use for enumeration.")
+	consumers   = flag.Int("consumers", 8, "Number of concurrent consumers.")
+	searchtxt   = flag.Bool("txt", false, "Search for TXT records")
+	searchcname = flag.Bool("cname", false, "Show CNAME results")
+	searcha     = flag.Bool("a", true, "Show A results")
 )
 
 // DoRequest actually handles the DNS lookups
 func DoRequest(sub string) interface{} {
 	hostname := fmt.Sprintf("%s.%s", sub, *base)
 	thisresult := Result{}
-	if addrs, err := net.LookupHost(hostname); err == nil {
-		thisresult.hostname = hostname
-		thisresult.addrs = addrs
+	if *searcha {
+		if addrs, err := net.LookupHost(hostname); err == nil {
+			thisresult.hostname = hostname
+			thisresult.addrs = addrs
+		}
 	}
 	if *searchtxt {
 		if txts, err := net.LookupTXT(hostname); err == nil {
 			thisresult.hostname = hostname
 			thisresult.txts = txts
+		}
+	}
+	if *searchcname {
+		if cname, err := net.LookupCNAME(hostname); err == nil {
+			thisresult.hostname = hostname
+			thisresult.cname = cname
 		}
 	}
 
@@ -69,9 +80,14 @@ func OnResult(res interface{}) {
 	}
 
 	g.Printf("%25s", result.hostname)
-	fmt.Printf(" : %v", result.addrs)
+	if *searcha {
+		fmt.Printf(" : A %v", result.addrs)
+	}
 	if *searchtxt {
-		fmt.Printf(" : %v", result.txts)
+		fmt.Printf(" : TXT %v", result.txts)
+	}
+	if *searchcname {
+		fmt.Printf(" : CNAME %v", result.cname)
 	}
 	fmt.Printf("\n")
 }
