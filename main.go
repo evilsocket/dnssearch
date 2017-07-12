@@ -10,7 +10,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/bobesa/go-domain-util/domainutil"
 	"github.com/evilsocket/brutemachine"
 	"github.com/fatih/color"
 )
@@ -114,7 +113,7 @@ func setup() {
 
 	flag.Parse()
 
-	if *base = domainutil.Domain(*base); *base == "" {
+	if *base == "" {
 		fmt.Println("Invalid or empty domain specified.")
 		flag.Usage()
 		os.Exit(1)
