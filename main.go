@@ -34,12 +34,13 @@ var (
 	r = color.New(color.FgRed)
 	b = color.New(color.FgBlue)
 
-	base        = flag.String("domain", "", "Base domain to start enumeration from.")
-	wordlist    = flag.String("wordlist", "names.txt", "Wordlist file to use for enumeration.")
-	consumers   = flag.Int("consumers", 8, "Number of concurrent consumers.")
-	searchtxt   = flag.Bool("txt", false, "Search for TXT records")
-	searchcname = flag.Bool("cname", false, "Show CNAME results")
-	searcha     = flag.Bool("a", true, "Show A results")
+	base         = flag.String("domain", "", "Base domain to start enumeration from.")
+	wordlist     = flag.String("wordlist", "names.txt", "Wordlist file to use for enumeration.")
+	consumers    = flag.Int("consumers", 8, "Number of concurrent consumers.")
+	searchtxt    = flag.Bool("txt", false, "Search for TXT records")
+	searchcname  = flag.Bool("cname", false, "Show CNAME results")
+	searcha      = flag.Bool("a", true, "Show A results")
+	forceTld     = flag.Bool("force-tld", true, "Extract top level from provided domain")
 )
 
 // DoRequest actually handles the DNS lookups
@@ -114,10 +115,14 @@ func setup() {
 
 	flag.Parse()
 
-	if *base = domainutil.Domain(*base); *base == "" {
+	if  *base == "" {
 		fmt.Println("Invalid or empty domain specified.")
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	if *forceTld {
+		*base = domainutil.Domain(*base);
 	}
 
 	// if interrupted, print statistics and exit
