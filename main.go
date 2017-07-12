@@ -115,14 +115,14 @@ func setup() {
 
 	flag.Parse()
 
+	if *forceTld {
+		*base = domainutil.Domain(*base);
+	}
+
 	if  *base == "" {
 		fmt.Println("Invalid or empty domain specified.")
 		flag.Usage()
 		os.Exit(1)
-	}
-
-	if *forceTld {
-		*base = domainutil.Domain(*base);
 	}
 
 	// if interrupted, print statistics and exit
