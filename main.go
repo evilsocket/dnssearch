@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/bobesa/go-domain-util/domainutil"
@@ -34,13 +35,13 @@ var (
 	r = color.New(color.FgRed)
 	b = color.New(color.FgBlue)
 
-	base         = flag.String("domain", "", "Base domain to start enumeration from.")
-	wordlist     = flag.String("wordlist", "names.txt", "Wordlist file to use for enumeration.")
-	consumers    = flag.Int("consumers", 8, "Number of concurrent consumers.")
-	searchtxt    = flag.Bool("txt", false, "Search for TXT records")
-	searchcname  = flag.Bool("cname", false, "Show CNAME results")
-	searcha      = flag.Bool("a", true, "Show A results")
-	forceTld     = flag.Bool("force-tld", true, "Extract top level from provided domain")
+	base        = flag.String("domain", "", "Base domain to start enumeration from.")
+	wordlist    = flag.String("wordlist", "names.txt", "Wordlist file to use for enumeration.")
+	consumers   = flag.Int("consumers", 8, "Number of concurrent consumers.")
+	searchtxt   = flag.Bool("txt", false, "Search for TXT records")
+	searchcname = flag.Bool("cname", false, "Show CNAME results")
+	searcha     = flag.Bool("a", true, "Show A results")
+	forceTld    = flag.Bool("force-tld", true, "Extract top level from provided domain")
 )
 
 // DoRequest actually handles the DNS lookups
@@ -62,13 +63,18 @@ func DoRequest(sub string) interface{} {
 	if *searchcname {
 		if cname, err := net.LookupCNAME(hostname); err == nil {
 			thisresult.hostname = hostname
-			thisresult.cname = cname
+			fmt.Sprintf(strings.TrimRight(cname, "."))
+			if strings.TrimRight(cname, ".") == hostname {
+				thisresult.cname = ""
+			} else {
+				thisresult.cname = cname
+			}
 		}
 	}
-
 	if thisresult.hostname == "" {
 		return nil
 	}
+
 	return thisresult
 }
 
@@ -116,10 +122,10 @@ func setup() {
 	flag.Parse()
 
 	if *forceTld {
-		*base = domainutil.Domain(*base);
+		*base = domainutil.Domain(*base)
 	}
 
-	if  *base == "" {
+	if *base == "" {
 		fmt.Println("Invalid or empty domain specified.")
 		flag.Usage()
 		os.Exit(1)

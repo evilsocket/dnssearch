@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {   
+            "name": "Launch file",
+            "type": "go",
+            "request": "launch",
+            //"port": 2345,
+        	//"host": "127.0.0.1",
+            "mode": "debug",
+            //"mode": "exec",
+            //"program": "/Users/ed/Sources/go/src/github.com/honeycombio/rdslogs/main.go",
+            //"program": "/Users/ed/Sources/go/src/github.com/honeycombio/rdslogs/main.go",
+            "program": "${workspaceRoot}",
+            "showLog": true,
+            "args": [
+                 "-a", 
+                 "-cname",
+                 "-txt", 
+                 "-domain",
+                 "google.com",
+                 "-wordlist",
+                 "names.txt"
+            ],
+            //"buildFlags": "-gcflags=\\\"-N -l\\\" -i -ldflags=\\\"-linkmode internal\\\" "
+            "buildFlags": "-gcflags='-N -l' -i -ldflags='-linkmode internal'"
+
+        }
+    ]
+}
