@@ -3,11 +3,14 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"net"
 	"os"
 	"os/signal"
+	"reflect"
 	"strings"
 	"syscall"
 
@@ -42,7 +45,32 @@ var (
 	searchcname = flag.Bool("cname", false, "Show CNAME results")
 	searcha     = flag.Bool("a", true, "Show A results")
 	forceTld    = flag.Bool("force-tld", true, "Extract top level from provided domain")
+
+	wildcard []string
 )
+
+// Lookup a random host to determine if a wildcard A record exists
+// Adapted from https://github.com/jrozner/sonar/blob/master/wildcard.go
+func detectWildcard(domain string) (bool, []string, error) {
+	bytes := make([]byte, 16)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return false, nil, err
+	}
+
+	domain = fmt.Sprintf("%s.%s", hex.EncodeToString(bytes), domain)
+
+	answers, err := net.LookupHost(domain)
+	if err != nil {
+		if asserted, ok := err.(*net.DNSError); ok && asserted.Err == "no such host" {
+			return false, nil, nil
+		}
+
+		return false, nil, err
+	}
+
+	return true, answers, nil
+}
 
 // DoRequest actually handles the DNS lookups
 func DoRequest(sub string) interface{} {
@@ -50,6 +78,10 @@ func DoRequest(sub string) interface{} {
 	thisresult := Result{}
 	if *searcha {
 		if addrs, err := net.LookupHost(hostname); err == nil {
+			if reflect.DeepEqual(addrs, wildcard) {
+				// This is likely a wildcard entry, skip it
+				return nil
+			}
 			thisresult.hostname = hostname
 			thisresult.addrs = addrs
 		}
@@ -116,6 +148,8 @@ func main() {
 
 // Do some initialization.
 func setup() {
+	hasWildcard := false
+
 	r.Printf("dnssearch")
 	fmt.Printf(" v%s\n\n", Version)
 
@@ -129,6 +163,12 @@ func setup() {
 		fmt.Println("Invalid or empty domain specified.")
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	hasWildcard, wildcard, _ = detectWildcard(*base)
+
+	if hasWildcard {
+		fmt.Printf("Detected Wildcard : %v\n\n", wildcard)
 	}
 
 	// if interrupted, print statistics and exit
