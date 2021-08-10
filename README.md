@@ -27,9 +27,7 @@ It supports a custom file extension ( `-ext`, default to `php` ) and other optio
        
 ## Compilation
 
-    go get github.com/evilsocket/dnssearch
-    cd dnssearch
-    go build -o dnssearch main.go
+    GO111MODULE=on go get -v github.com/evilsocket/dnssearch
 
 ## Compilation and use with Docker
 
